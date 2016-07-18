@@ -1,0 +1,34 @@
+# Write the integer value 1 to current frame.
+.w 1
+
+# Increment tape.
++
+
+# Write the integer value 1 to current frame.
+.w 1
+
+# Increment tape
++
+
+# Write the sum of t1 and t2 to current frame
+.w t1 + t2 
+
+# Execute the above instructions on one line,
+# using the |
+
+.w 1 | + | .w 1 | + | .w t1 + t2
+
+# Specify and name sequence above as a region
+.r |.n add | .w 1 | + | .w 1 | + | .w n1 + n2
+
+# Or like this with auto increment on (* +):
+# (tape increments 1 frame after each write)
+
+.r | .n add | * + | .w 1 | .w 1 | .w n1+n2
+
+# Or like this, using auto increment and auto write.
+# (tape increments 1 frame and writes value)
+
+.r | .n add | * + .w | 1 | 1| n1+n2
+
+
