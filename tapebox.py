@@ -3,6 +3,9 @@
 
 import sys
 
+#----------------------------------------------------------------------
+# Class definitions
+
 class Tape:
     def __init__(self):
         self.QUE = []                # Instruction Call Que
@@ -10,8 +13,8 @@ class Tape:
         self.IC = 0                  # Instruction Counter
         self.ID = 1                  # Instruction Direction
         self.IZ = 0                  # Instruction Size
-        self.NS = 1                  # Number of Segments
-        self.SP = 1                  # Segment Pointer
+        self.NS = 0                  # Number of Segments
+        self.SP = 0                  # Segment Pointer
         self.FP = 0                  # Frame Pointer
         self.FRAMES = []             # Frame Values
         self.NAMES = []              # Frame and Segment Names
@@ -59,17 +62,21 @@ class Machine:
         self.MERGE = '.m'           # Merge (or join) two segment regions
         self.CUT = '.c'             # Cut tape segment region into two
         self.PASTE = '.p'           # Paste (or write) into a segment region
+        self.INSPECT = '.i'         # Inspect (report) the machine's state
         self.SRC = []               # Source program file
         self.TAPE = Tape()          # Initial tape instance
         self.LOOKUP = []            # Initial lookup table instance
         self.SWITCH = 0             # Switch for switching tapes
+        self.PROMPT = ']['
         self.RUN = True             # Machine run state
 
         # IMPORTANT! Initialize each TAPE.FRAME value at zero.
 
         for frame in range(cap):
             self.TAPE.FRAMES.append(0);
-            
+
+#----------------------------------------------------------------------            
+# Utility Functions
 
     # Load a source file from argv
 
@@ -81,9 +88,13 @@ class Machine:
         file.close()
 
         return {sys.argv[1]: lines}
+
+#----------------------------------------------------------------------
+# Runtime
     
     # Machine.run initializes a tape and program runtime.
     # It either loads a program from file, or starts a repl instance.
+
     def run(self):
 
         # A program source file was provided.
@@ -94,18 +105,25 @@ class Machine:
         # No source file provided, run repl interpretter.
         else:
             while self.RUN:
-                self.SRC.append(input('][ '))
+
+                # Get repl input, prepend Frame Pointer to PROMPT
+                # User input becomes the 'command' variable.
+
+                self.SRC.append(input(str(self.TAPE.FP) + self.PROMPT)
                 command = self.SRC[len(self.SRC)-1]
+                
+                # Exit on input of 'q'
 
                 if command == 'q':
                     print('exiting...')
                     exit(0)
+                
+                # Call program_step, provides 'command' as argument.
+                
                 else:
                     self.program_step(command)
-                    print(self.TAPE.FP)  
-
-
-    # Interpretter implementation.
+#----------------------------------------------------------------------
+# Interpretter implementation
 
     def program_step(self, line):
         
@@ -113,12 +131,16 @@ class Machine:
 
         for i in range(len(line)):
                 
+            # INC increment tape ( + )
+
             if line[i] == self.INC:
                 # self.TAPE.move(1)
                 if self.TAPE.FP == self.CAP:
                     print('ERROR: Frame Pointer reached Tape Capacity')
                 else:
                     self.TAPE.FP += 1
+            
+            # DEC decrement tape ( - )
 
             elif line[i] == self.DEC:
                 if self.TAPE.FP == 0:
@@ -126,13 +148,15 @@ class Machine:
                 else:
                     self.TAPE.FP -= 1
 
-            # Write to current Frame Pointer ( .w value )
+            # WRITE to current Frame Pointer ( .w value )
 
             elif line[i] == self.WRITE:
                 self.TAPE.FRAMES[self.TAPE.FP] = line[i+1]
  
-            # Read from current Frame Pointer
+            # READ a frame's value ( .r )  
+            # Read from current Frame Pointer, or specified index
             # Usage: .r [blank] or .r [index]
+
             elif line[i] == self.READ:
                 if len(line) > 1:
 
@@ -151,11 +175,28 @@ class Machine:
                 else:
                     print(self.TAPE.FRAMES[self.TAPE.FP])
             
-            elif line[i] == '.i':
-                print(self.TAPE)
-
+            # SEGMENT instruction ( .s )
+            # Create a new named segment, or un-named segment.
+            # Usage: .s .n [mysegment], or just the ( .s ) command.
+ 
             elif line[i] == self.SEGMENT:
-                print('Segment')
+                # Increment number of segments counter.
+                self.TAPE.NS += 1
+                
+                if len(line) > 1:
+                    if line[i+1] == self.NAME:
+                        self.TAPE.NAMES.append({ line[i+2]: self.TAPE.FP })
+                        self.LOOKUP.append(self.TAPE.NAMES[-1])
+                
+                # A name command to name the new segment wasn't given.
+                # Add unnamed segment to LOOKUP, start segment at Frame Pointer.
+
+                else:
+                    self.LOOKUP.append({ "(S)":(self.TAPE.NS, self.TAPE.FP) })
+
+                print(self.LOOKUP)     
+                
+            # NAME instruction ( .n )
             elif line[i] == self.NAME:
                 print('Name')
             elif line[i] == self.DELETE:
@@ -167,12 +208,24 @@ class Machine:
             elif line[i] == self.PASTE:
                 print('Paste')
 
+            # Print tape report on INSPECT command.
+
+            elif line[i] == self.INSPECT:
+                print(self.TAPE)
+
             # Increment instruction counter
             self.TAPE.IC += 1
-                
+    
+    # Program execute is called on program source files
+    # and feeds each line of code to program_step.
+
     def program_execute(self, program):
         for line in program:
             self.program_step(line)
+
+#----------------------------------------------------------------------
+# For development purposes.
+# A machine and tape runtime start up when this file is loaded or imported.
 
 # Initialize and run the machine.
 M = Machine(200)
