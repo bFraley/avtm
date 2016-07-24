@@ -65,6 +65,11 @@ class Machine:
         self.SWITCH = 0             # Switch for switching tapes
         self.RUN = True             # Machine run state
 
+        # IMPORTANT! Initialize each TAPE.FRAME value at zero.
+
+        for frame in range(cap):
+            self.TAPE.FRAMES.append(0);
+            
 
     # Load a source file from argv
 
@@ -124,7 +129,7 @@ class Machine:
             # Write to current Frame Pointer ( .w value )
 
             elif line[i] == self.WRITE:
-                self.TAPE.FRAMES.append(line[i+1])
+                self.TAPE.FRAMES[self.TAPE.FP] = line[i+1]
  
             # Read from current Frame Pointer
             # Usage: .r [blank] or .r [index]
