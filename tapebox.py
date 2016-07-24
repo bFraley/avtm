@@ -182,21 +182,33 @@ class Machine:
             # Usage: .s .n [mysegment], or just the ( .s ) command.
  
             elif line[i] == self.SEGMENT:
+
                 # Increment number of segments counter.
                 self.TAPE.NS += 1
                 
                 if len(line) > 1:
+
+                    # Is there a .n name command present?
                     if line[i+1] == self.NAME:
-                        self.TAPE.NAMES.append({ line[i+2]: self.TAPE.FP })
-                        self.LOOKUP.append(self.TAPE.NAMES[-1])
-                
+
+                        # If there is a name for the segment supplied, append the
+                        # {segment name: frame index of segment's first frame}
+                        # to TAPE.NAMES and LOOKUP
+                        
+                        if len(line) > 2:
+                            self.TAPE.NAMES.append({ line[i+2]: self.TAPE.FP })
+                            self.LOOKUP.append(self.TAPE.NAMES[-1])
+
+                        # Error if no name was provided after the .n command.
+                        else:
+                            print('ERROR: Segment (.s .n name) missing name')
+
                 # A name command to name the new segment wasn't given.
                 # Add unnamed segment to LOOKUP, start segment at Frame Pointer.
-
                 else:
                     self.LOOKUP.append({ "(S)":(self.TAPE.NS, self.TAPE.FP) })
 
-                print(self.LOOKUP)     
+                print(self.LOOKUP[-1])     
                 
             # NAME instruction ( .n )
             elif line[i] == self.NAME:
