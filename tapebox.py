@@ -56,7 +56,7 @@ class Machine:
         self.SEGMENT = '.s'         # Segment a tape into a region
         self.NAME = '.n'            # Name a tape segment region
         self.DELETE = '.d'          # Delete a tape segment region
-        self.MERGE = '.a'           # Merge (or join) two segment regions
+        self.MERGE = '.m'           # Merge (or join) two segment regions
         self.CUT = '.c'             # Cut tape segment region into two
         self.PASTE = '.p'           # Paste (or write) into a segment region
         self.SRC = []               # Source program file
