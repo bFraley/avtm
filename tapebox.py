@@ -122,6 +122,7 @@ class Machine:
                 
                 else:
                     self.program_step(command)
+
 #----------------------------------------------------------------------
 # Interpretter implementation
 
@@ -151,7 +152,8 @@ class Machine:
             # WRITE to current Frame Pointer ( .w value )
 
             elif line[i] == self.WRITE:
-                self.TAPE.FRAMES[self.TAPE.FP] = line[i+1]
+                value = ' '.join(line[1:])
+                self.TAPE.FRAMES[self.TAPE.FP] = value
  
             # READ a frame's value ( .r )  
             # Read from current Frame Pointer, or specified index
