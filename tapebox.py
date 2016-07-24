@@ -26,13 +26,13 @@ class Tape:
         for item in self.QUE:
             tape_report += str(item)
 
-        tape_report += 'Instruction Pointer: ' + str(self.IP) + '\n'
-        tape_report += 'Instruction Counter: ' + str(self.IC) + '\n'
-        tape_report += 'Instruction Direction:'+ str(self.ID) + '\n'
-        tape_report += 'Instruction Size: '    + str(self.IZ) + '\n'
-        tape_report += 'Number of Segments: '  + str(self.NS) + '\n'
-        tape_report += 'Segment Pointer: '     + str(self.SP) + '\n'
-        tape_report += 'Frame Pointer: '       + str(self.FP) + '\n'
+        tape_report += 'Instruction Pointer: '    + str(self.IP) + '\n'
+        tape_report += 'Instruction Counter: '    + str(self.IC) + '\n'
+        tape_report += 'Instruction Direction:'   + str(self.ID) + '\n'
+        tape_report += 'Instruction Size: '       + str(self.IZ) + '\n'
+        tape_report += 'Number of Segments: '     + str(self.NS) + '\n'
+        tape_report += 'Segment Pointer: '        + str(self.SP) + '\n'
+        tape_report += 'Frame Pointer: '          + str(self.FP) + '\n'
          
         tape_report += '\nFrames: '
         for item in self.FRAMES:
@@ -67,7 +67,7 @@ class Machine:
         self.TAPE = Tape()          # Initial tape instance
         self.LOOKUP = []            # Initial lookup table instance
         self.SWITCH = 0             # Switch for switching tapes
-        self.PROMPT = ']['
+        self.PROMPT = 'frame '     # Prompt text provides frame and segment info
         self.RUN = True             # Machine run state
 
         # IMPORTANT! Initialize each TAPE.FRAME value at zero.
@@ -106,10 +106,10 @@ class Machine:
         else:
             while self.RUN:
 
-                # Get repl input, prepend Frame Pointer to PROMPT
-                # User input becomes the 'command' variable.
+                # Get repl input, assign PROMPT information.
+                # User input gets assigned to the 'command' variable.
 
-                self.SRC.append(input(str(self.TAPE.FP) + self.PROMPT)
+                self.SRC.append(input(self.PROMPT + str(self.TAPE.FP) + ' :'))
                 command = self.SRC[len(self.SRC)-1]
                 
                 # Exit on input of 'q'
