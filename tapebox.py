@@ -127,10 +127,14 @@ class Machine:
 # Interpretter implementation
 
     def program_step(self, line):
+        i = 0
         
+        # Amount to skip ahead (i) in line
+        skip = 0 
+
         line = line.split(' ')
 
-        for i in range(len(line)):
+        while i < len(line):
                 
             # INC increment tape ( + )
 
@@ -191,11 +195,18 @@ class Machine:
                     # Is there a .n name command present?
                     if line[i+1] == self.NAME:
 
+                        # Peeked ahead of (i) in command, skip ahead on next loop.
+                        skip += 1
+
                         # If there is a name for the segment supplied, append the
                         # {segment name: frame index of segment's first frame}
                         # to TAPE.NAMES and LOOKUP
                         
                         if len(line) > 2:
+                            
+                            # Peek ahead again, skip on next loop.
+                            skip += 1
+
                             self.TAPE.NAMES.append({ line[i+2]: self.TAPE.FP })
                             self.LOOKUP.append(self.TAPE.NAMES[-1])
 
@@ -227,8 +238,11 @@ class Machine:
             elif line[i] == self.INSPECT:
                 print(self.TAPE)
 
-            # Increment instruction counter
+            # Increment instruction counter.
             self.TAPE.IC += 1
+
+            # Skip (i) ahead for next loop.
+            i += 1 + skip
     
     # Program execute is called on program source files
     # and feeds each line of code to program_step.
