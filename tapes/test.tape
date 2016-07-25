@@ -1,6 +1,9 @@
 # Write the integer value 1 to current frame.
 .w 1
 
+# Read the value in current frame.
+.r
+
 # Increment tape.
 +
 
@@ -10,15 +13,15 @@
 # Execute the above instructions on one line.
 .w 1 + .w 1 + .w .calc t1 + t2
 
-# Specify and name sequence above as a region
-.r .n add .w 1  + .w 1  + .w .calc t1 + t2
+# Specify and name these instructions as a segment.
+.s .n add .w 1  + .w 1  + .w .calc t1 + t2
 
 # Or like this with auto increment on (* +):
 # (tape increments 1 frame after each write)
 
-.r .n add *+ .w 1 .w 1 .w .calc t1 + t2
+.s .n add *+ .w 1 .w 1 .w .calc t1 + t2
 
 # Or like this, using auto increment and auto write.
-.r .n add *+ *.w  1 1 .calc t1 + t2
+.s .n add *+ *.w  1 1 .calc t1 + t2
 
 
