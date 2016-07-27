@@ -133,6 +133,7 @@ class Machine:
         skip = 0 
 
         line = line.split(' ')
+        line_length = len(line)
 
         while i < len(line):
                 
@@ -156,15 +157,18 @@ class Machine:
             # WRITE to current Frame Pointer ( .w value )
 
             elif line[i] == self.WRITE:
-                value = ' '.join(line[1:])
-                self.TAPE.FRAMES[self.TAPE.FP] = value
+                if line_length > 1:
+                    value = ' '.join(line[1:])
+                    self.TAPE.FRAMES[self.TAPE.FP] = value
+                else:
+                    print('WARNING: Missing a value to write after ( .w )')
  
             # READ a frame's value ( .r )  
             # Read from current Frame Pointer, or specified index
             # Usage: .r [blank] or .r [index]
 
             elif line[i] == self.READ:
-                if len(line) > 1:
+                if line_length > 1:
 
                     frameindex = int(line[i+1])
 
@@ -190,7 +194,7 @@ class Machine:
                 # Increment number of segments counter.
                 self.TAPE.NS += 1
                 
-                if len(line) > 1:
+                if line_length > 1:
 
                     # Is there a .n name command present?
                     if line[i+1] == self.NAME:
@@ -202,7 +206,7 @@ class Machine:
                         # {segment name: frame index of segment's first frame}
                         # to TAPE.NAMES and LOOKUP
                         
-                        if len(line) > 2:
+                        if line_length  > 2:
                             
                             # Peek ahead again, skip on next loop.
                             skip += 1
