@@ -28,7 +28,7 @@ class Tape:
 
         tape_report += 'Instruction Pointer: '    + str(self.IP) + '\n'
         tape_report += 'Instruction Counter: '    + str(self.IC) + '\n'
-        tape_report += 'Instruction Direction:'   + str(self.ID) + '\n'
+        tape_report += 'Instruction Direction: '  + str(self.ID) + '\n'
         tape_report += 'Instruction Size: '       + str(self.IZ) + '\n'
         tape_report += 'Number of Segments: '     + str(self.NS) + '\n'
         tape_report += 'Segment Pointer: '        + str(self.SP) + '\n'
@@ -67,7 +67,7 @@ class Machine:
         self.TAPE = Tape()          # Initial tape instance
         self.LOOKUP = []            # Initial lookup table instance
         self.SWITCH = 0             # Switch for switching tapes
-        self.PROMPT = 'frame '     # Prompt text provides frame and segment info
+        self.PROMPT = 'frame '      # Prompt text provides frame and segment info
         self.RUN = True             # Machine run state
 
         # IMPORTANT! Initialize each TAPE.FRAME value at zero.
@@ -140,7 +140,7 @@ class Machine:
             # INC increment tape ( + )
 
             if line[i] == self.INC:
-                # self.TAPE.move(1)
+
                 if self.TAPE.FP == self.CAP:
                     print('ERROR: Frame Pointer reached Tape Capacity')
                 else:
@@ -255,6 +255,31 @@ class Machine:
         for line in program:
             self.program_step(line)
 
+#--------------------------------------------------------------------
+# Core 
+
+class Core():
+    def __init__(self):
+        self.opchars = ['+','-','*','/']
+
+    def add(self, left, right):
+        return left + right
+
+    def sub(self, left, right):
+        return left - right
+
+    def mul(self, left, right):
+        return left * right
+
+    def div(self, left, right):
+        return left / right
+
+    def mod(self, left, right):
+        return left % right
+
+    def exp(self, expression):
+        return expression
+
 #----------------------------------------------------------------------
 # For development purposes.
 # A machine and tape runtime start up when this file is loaded or imported.
@@ -262,3 +287,4 @@ class Machine:
 # Initialize and run the machine.
 M = Machine(200)
 M.run()
+
