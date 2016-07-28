@@ -1,0 +1,25 @@
+https://github.com/Bfaley/avtm - todo.txt
+
+July 28, 2016
+
+Current main goal:
+    Progress to the point where code organization makes sense, all instructions are working properly,
+    and basic documentation and how to text is complete.
+
+
+GENERAL
+- Restructure codebase to improve modularity.
+- Distinguish between parse behavior and instruction calling behavior.
+- Improve on lex/parse base functions in program_step and define them in the Core class.
+- Finalize syntax based rules, command ordering options.
+- Identify opportunities and obstacles for targeting PyPy.
+- Identify opportunities and obstacles for targeting Numpile.
+
+SPECIFIC
+- implement binary search for names lookup
+- implement arithmetic operators for the .calc method
+- implement complex arithmetic expression parsing
+- implement protected (read only)  segments or whole tapes
+- implement encryption/decryption for segments or whole tapes
+- implement type classes for segments in order to store and manipulate different types of data and files in a segment.
+    
