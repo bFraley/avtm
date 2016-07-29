@@ -66,7 +66,6 @@ class Machine:
         self.SRC = []               # Source program file
         self.TAPE = Tape()          # Initial tape instance
         self.LOOKUP = []            # Initial lookup table instance
-        self.SWITCH = 0             # Switch for switching tapes
         self.PROMPT = 'frame '      # Prompt text provides frame and segment info
         self.RUN = True             # Machine run state
 
@@ -155,6 +154,10 @@ class Machine:
                     self.TAPE.FP -= 1
 
             # WRITE to current Frame Pointer ( .w value )
+            # NOTE: Anything after .w on the same line is
+            # written to the current frame. Need to look ahead of
+            # the write value for a pipe delimiter which allows for 
+            # additional instructions to be on the same line as a ( .w )            
 
             elif line[i] == self.WRITE:
                 if line_length > 1:
@@ -224,10 +227,18 @@ class Machine:
                     self.LOOKUP.append({ "(S)":(self.TAPE.NS, self.TAPE.FP) })
 
                 print(self.LOOKUP[-1])     
+
                 
             # NAME instruction ( .n )
+            # Name a frame location
             elif line[i] == self.NAME:
-                print('Name')
+                if line_length > 1:
+                    self.TAPE.NAMES.append({ line[i+1]:self.TAPE.FP })
+                    self.LOOKUP.append(self.TAPE.NAMES[-1])
+                else:
+                    print('Expected name after ( .n ) is missing')
+
+
             elif line[i] == self.DELETE:
                 print('Delete')
             elif line[i] == self.MERGE:

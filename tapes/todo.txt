@@ -15,11 +15,12 @@ GENERAL
 - Identify opportunities and obstacles for targeting PyPy.
 - Identify opportunities and obstacles for targeting Numpile.
 
-SPECIFIC
-- implement binary search for names lookup
-- implement arithmetic operators for the .calc method
-- implement complex arithmetic expression parsing
-- implement protected (read only)  segments or whole tapes
-- implement encryption/decryption for segments or whole tapes
-- implement type classes for segments in order to store and manipulate different types of data and files in a segment.
+IMPLEMENT
+- Core class    
+- binary search for names lookup.
+- arithmetic operators for the .calc method.
+- complex arithmetic expression parsing.
+- protected (read only)  segments or whole tapes.
+- encryption/decryption for segments or whole tapes.
+- type classes for segments in order to store and manipulate typed data and files in a segment.
     
