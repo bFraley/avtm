@@ -63,6 +63,7 @@ class Machine:
         self.CUT = '.c'             # Cut tape segment region into two
         self.PASTE = '.p'           # Paste (or write) into a segment region
         self.INSPECT = '.i'         # Inspect (report) the machine's state
+        self.CORE = Core()          # Core implementation of machine instructions
         self.SRC = []               # Source program file
         self.TAPE = Tape()          # Initial tape instance
         self.LOOKUP = []            # Initial lookup table instance
@@ -87,6 +88,17 @@ class Machine:
         file.close()
 
         return {sys.argv[1]: lines}
+
+    # Check if word is Alphanumeric, and can't start with a digit.
+    def lex_namespace(self, word):
+        if word.isalnum():
+            if word[0].isdigit():
+                print('NAME ERROR: name begins with digit')
+                exit(0)
+            else:
+                return True
+        else:
+            return False
 
 #----------------------------------------------------------------------
 # Runtime
@@ -233,8 +245,17 @@ class Machine:
             # Name a frame location
             elif line[i] == self.NAME:
                 if line_length > 1:
-                    self.TAPE.NAMES.append({ line[i+1]:self.TAPE.FP })
-                    self.LOOKUP.append(self.TAPE.NAMES[-1])
+                    tryname = line[i+1]
+
+                    # Is this namespace already defined?
+                    # Is the input a valid name?
+                    
+                    #if self.TAPE.NAMES[tryname]:TRY ME
+                    #    print('ERROR: Cannot assign this name. Already in use')
+                    
+                    if self.lex_namespace(line[i+1]):
+                        self.TAPE.NAMES.append({ line[i+1]:self.TAPE.FP })
+                        self.LOOKUP.append(self.TAPE.NAMES[-1])
                 else:
                     print('Expected name after ( .n ) is missing')
 
