@@ -1,4 +1,4 @@
 # gitignore for avtm/tapebox project
 
-__pycache__/_
+__pycache__/
 
