@@ -89,7 +89,8 @@ class Machine:
 
         return {sys.argv[1]: lines}
 
-    # Check if word is Alphanumeric, and can't start with a digit.
+    # Lex namespace identifiers - alphanumeric, and can't start with a digit.
+
     def lex_namespace(self, word):
         if word.isalnum():
             if word[0].isdigit():
@@ -98,8 +99,22 @@ class Machine:
             else:
                 return True
         else:
+            print('NAME ERROR: unknown input after .n instruction')
             return False
 
+    # Lookup a namespace identifier and frame index if it exists.
+
+    def try_lookup(self, word):
+        if word in self.TAPE.NAMES:
+            return True
+
+    def lookup_by_name(self, name):
+        for i in self.LOOKUP:
+            if name in i:
+                value = i[name]
+                return value
+            
+                
 #----------------------------------------------------------------------
 # Runtime
     
@@ -180,23 +195,43 @@ class Machine:
  
             # READ a frame's value ( .r )  
             # Read from current Frame Pointer, or specified index
-            # Usage: .r [blank] or .r [index]
+            # Usage: .r [blank] or .r [index] or .r [namespace]
 
             elif line[i] == self.READ:
                 if line_length > 1:
+                
+                    read_argument = line[i+1]
 
-                    frameindex = int(line[i+1])
+                    # Read a frame's value via frame index number.
+                    if read_argument.isdigit():
+                        read_argument = int(read_argument)
+                    
+                        if read_argument == len(self.TAPE.FRAMES):
+                            print('ERROR: Read above frame index range')
+                            exit(0)
 
-                    if frameindex == len(self.TAPE.FRAMES):
-                        print('ERROR: Read above frame index range')
-                        exit(0)
+                        elif read_argument < 0:
+                            print('ERROR: Read below frame index range')
+                            exit(0)
 
-                    elif frameindex < 0:
-                        print('ERROR: Read below frame index range')
-                        exit(0)
+                        else:
+                            value = self.TAPE.FRAMES[read_argument]
+                            print(value)
+                            return value
 
-                    else:
-                        print(self.TAPE.FRAMES[int(line[i+1])])
+                    # Read a frame's value via namespace identifier.
+                    elif self.lex_namespace(read_argument):
+                         
+                        if self.try_lookup(read_argument):
+                            frameindex = self.lookup_by_name(read_argument)
+                            value = self.TAPE.FRAMES[frameindex]
+                            print(value)
+                            return value
+                        else:
+                            print('Cannot read name from tape, unrecognized name')
+
+                # No specific read argument was provided, so read the current frame.
+
                 else:
                     print(self.TAPE.FRAMES[self.TAPE.FP])
             
@@ -219,15 +254,16 @@ class Machine:
 
                         # If there is a name for the segment supplied, append the
                         # {segment name: frame index of segment's first frame}
-                        # to TAPE.NAMES and LOOKUP
+                        # to  LOOKUP and the name to NAMES
                         
                         if line_length  > 2:
                             
                             # Peek ahead again, skip on next loop.
                             skip += 1
 
-                            self.TAPE.NAMES.append({ line[i+2]: self.TAPE.FP })
-                            self.LOOKUP.append(self.TAPE.NAMES[-1])
+                            name = line[i+2]
+                            self.TAPE.NAMES.append(name)
+                            self.LOOKUP.append({name:self.TAPE.FP})
 
                         # Error if no name was provided after the .n command.
                         else:
@@ -243,19 +279,22 @@ class Machine:
                 
             # NAME instruction ( .n )
             # Name a frame location
+
             elif line[i] == self.NAME:
                 if line_length > 1:
                     tryname = line[i+1]
 
                     # Is this namespace already defined?
+                
+                    if self.try_lookup(tryname):
+                        print('ERROR: Cannot assign this name. Already in use')
+                
                     # Is the input a valid name?
-                    
-                    #if self.TAPE.NAMES[tryname]:TRY ME
-                    #    print('ERROR: Cannot assign this name. Already in use')
-                    
-                    if self.lex_namespace(line[i+1]):
-                        self.TAPE.NAMES.append({ line[i+1]:self.TAPE.FP })
-                        self.LOOKUP.append(self.TAPE.NAMES[-1])
+    
+                    if self.lex_namespace(tryname):
+                        self.TAPE.NAMES.append(tryname)
+                        self.LOOKUP.append({tryname:self.TAPE.FP})
+
                 else:
                     print('Expected name after ( .n ) is missing')
 
