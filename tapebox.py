@@ -8,35 +8,20 @@ import sys
 
 class Tape:
     def __init__(self):
-        self.QUE = []                # Instruction Call Que
-        self.IP = 0                  # Instruction Pointer
         self.IC = 0                  # Instruction Counter
-        self.ID = 1                  # Instruction Direction
-        self.IZ = 0                  # Instruction Size
         self.NS = 0                  # Number of Segments
         self.SP = 0                  # Segment Pointer
         self.FP = 0                  # Frame Pointer
+        self.CAP = 64
         self.FRAMES = []             # Frame Values
         self.NAMES = []              # Frame and Segment Names
         self.SCOPE = []              # Frame Scope (frame view range)
 
     def __str__(self):
-        tape_report = ''
-
-        for item in self.QUE:
-            tape_report += str(item)
-
-        tape_report += 'Instruction Pointer: '    + str(self.IP) + '\n'
-        tape_report += 'Instruction Counter: '    + str(self.IC) + '\n'
-        tape_report += 'Instruction Direction: '  + str(self.ID) + '\n'
-        tape_report += 'Instruction Size: '       + str(self.IZ) + '\n'
-        tape_report += 'Number of Segments: '     + str(self.NS) + '\n'
-        tape_report += 'Segment Pointer: '        + str(self.SP) + '\n'
-        tape_report += 'Frame Pointer: '          + str(self.FP) + '\n'
-         
-        tape_report += '\nFrames: '
-        for item in self.FRAMES:
-            tape_report += ' | ' + str(item)
+   
+        tape_report = '\nNumber of Segments: ' +  str(self.NS) + \
+           '\nSegment Pointer: ' +  str(self.SP) + \
+               '\nFrame Pointer: ' + str(self.FP)
         
         tape_report += '\nNames: '
         for item in self.NAMES:
@@ -46,28 +31,21 @@ class Tape:
         for item in self.SCOPE:
             tape_report += ' | ' + str(item)
 
+        tape_report +=  '\nFrames:'
+        for item in self.FRAMES:
+            tape_report += ' | ' + str(item)
+    
+        tape_report += '\n'          
         return tape_report
+
 
 class Machine:
     def __init__(self, cap):
-        self.CAP = cap              # Capacity length of tape
-        self.AUTO = '*'             # Specify to auto an instruction
-        self.INC = '+'              # Increment tape
-        self.DEC = '-'              # Decrement tape
-        self.WRITE = '.w'           # Write tape frame 
-        self.READ = '.r'            # Read tape frame
-        self.SEGMENT = '.s'         # Segment a tape into a region
-        self.NAME = '.n'            # Name a tape segment region
-        self.DELETE = '.d'          # Delete a tape segment region
-        self.MERGE = '.m'           # Merge (or join) two segment regions
-        self.CUT = '.c'             # Cut tape segment region into two
-        self.PASTE = '.p'           # Paste (or write) into a segment region
-        self.INSPECT = '.i'         # Inspect (report) the machine's state
-        self.CORE = Core()          # Core implementation of machine instructions
+        self.CAP = cap
         self.SRC = []               # Source program file
-        self.TAPE = Tape()          # Initial tape instance
         self.LOOKUP = []            # Initial lookup table instance
-        self.PROMPT = 'frame '      # Prompt text provides frame and segment info
+        self.CORE = Core()
+        self.TAPE = self.CORE.TAPE
         self.RUN = True             # Machine run state
 
         # IMPORTANT! Initialize each TAPE.FRAME value at zero.
@@ -80,7 +58,7 @@ class Machine:
 
     # Load a source file from argv
 
-    def loadfile(self):
+    def load_tape_file(self):
         # Only accepts a single file for now.
         file = open(sys.argv[1])
         src = file.read()
@@ -102,11 +80,13 @@ class Machine:
             print('NAME ERROR: unknown input after .n instruction')
             return False
 
-    # Lookup a namespace identifier and frame index if it exists.
+    # Lookup if an identifer name exists in TAPE.NAMES
 
     def try_lookup(self, word):
         if word in self.TAPE.NAMES:
             return True
+
+    # Lookup the value of a known identifier name.
 
     def lookup_by_name(self, name):
         for i in self.LOOKUP:
@@ -135,12 +115,12 @@ class Machine:
                 # Get repl input, assign PROMPT information.
                 # User input gets assigned to the 'command' variable.
 
-                self.SRC.append(input(self.PROMPT + str(self.TAPE.FP) + ' :'))
+                self.SRC.append(input('frame ' + str(self.TAPE.FP) + ' :'))
                 command = self.SRC[len(self.SRC)-1]
                 
                 # Exit on input of 'q'
 
-                if command == 'q':
+                if command is 'q':
                     print('exiting...')
                     exit(0)
                 
@@ -161,35 +141,23 @@ class Machine:
         line = line.split(' ')
         line_length = len(line)
 
-        while i < len(line):
+        while i < line_length:
                 
             # INC increment tape ( + )
 
-            if line[i] == self.INC:
+            if line[i] is self.CORE.instructions[0]:
+                self.CORE.call_INC()
 
-                if self.TAPE.FP == self.CAP:
-                    print('ERROR: Frame Pointer reached Tape Capacity')
-                else:
-                    self.TAPE.FP += 1
-            
             # DEC decrement tape ( - )
 
-            elif line[i] == self.DEC:
-                if self.TAPE.FP == 0:
-                    print('ERROR: Frame Pointer at 0, cannot Decrement!')
-                else:
-                    self.TAPE.FP -= 1
+            elif line[i] is self.CORE.instructions[1]:
+                self.CORE.call_DEC()            
 
-            # WRITE to current Frame Pointer ( .w value )
-            # NOTE: Anything after .w on the same line is
-            # written to the current frame. Need to look ahead of
-            # the write value for a pipe delimiter which allows for 
-            # additional instructions to be on the same line as a ( .w )            
+            # WRITE to current frame ( .w )            
 
-            elif line[i] == self.WRITE:
+            elif line[i] == self.CORE.instructions[2]:
                 if line_length > 1:
-                    value = ' '.join(line[1:])
-                    self.TAPE.FRAMES[self.TAPE.FP] = value
+                    self.CORE.call_WRITE(line)
                 else:
                     print('WARNING: Missing a value to write after ( .w )')
  
@@ -197,7 +165,7 @@ class Machine:
             # Read from current Frame Pointer, or specified index
             # Usage: .r [blank] or .r [index] or .r [namespace]
 
-            elif line[i] == self.READ:
+            elif line[i] == self.CORE.instructions[3]:
                 if line_length > 1:
                 
                     read_argument = line[i+1]
@@ -206,7 +174,7 @@ class Machine:
                     if read_argument.isdigit():
                         read_argument = int(read_argument)
                     
-                        if read_argument == len(self.TAPE.FRAMES):
+                        if read_argument >= len(self.TAPE.FRAMES):
                             print('ERROR: Read above frame index range')
                             exit(0)
 
@@ -231,7 +199,6 @@ class Machine:
                             print('Cannot read name from tape, unrecognized name')
 
                 # No specific read argument was provided, so read the current frame.
-
                 else:
                     print(self.TAPE.FRAMES[self.TAPE.FP])
             
@@ -239,7 +206,7 @@ class Machine:
             # Create a new named segment, or un-named segment.
             # Usage: .s .n [mysegment], or just the ( .s ) command.
  
-            elif line[i] == self.SEGMENT:
+            elif line[i] == '.s':
 
                 # Increment number of segments counter.
                 self.TAPE.NS += 1
@@ -247,7 +214,7 @@ class Machine:
                 if line_length > 1:
 
                     # Is there a .n name command present?
-                    if line[i+1] == self.NAME:
+                    if line[i+1] is '.n':
 
                         # Peeked ahead of (i) in command, skip ahead on next loop.
                         skip += 1
@@ -280,7 +247,7 @@ class Machine:
             # NAME instruction ( .n )
             # Name a frame location
 
-            elif line[i] == self.NAME:
+            elif line[i] == '.n':
                 if line_length > 1:
                     tryname = line[i+1]
 
@@ -299,18 +266,18 @@ class Machine:
                     print('Expected name after ( .n ) is missing')
 
 
-            elif line[i] == self.DELETE:
+            elif line[i] == '.d':
                 print('Delete')
-            elif line[i] == self.MERGE:
+            elif line[i] == '.m':
                 print('Merge')
-            elif line[i] == self.CUT:
+            elif line[i] == '.c':
                 print('Cut')
-            elif line[i] == self.PASTE:
+            elif line[i] == '.p':
                 print('Paste')
 
             # Print tape report on INSPECT command.
 
-            elif line[i] == self.INSPECT:
+            elif line[i] == '.i':
                 print(self.TAPE)
 
             # Increment instruction counter.
@@ -328,10 +295,46 @@ class Machine:
 
 #--------------------------------------------------------------------
 # Core 
+# TODO: PRVATE METHODS
 
 class Core():
     def __init__(self):
+        self.instructions = ['+','-','.w','.r','.n','.s','.d','.m','.c','.p']
         self.opchars = ['+','-','*','/']
+        self.TAPE = Tape()
+
+    def call_open_file(self, filename, mode, label_name):
+         filestream = open(filename, mode)
+         contents = filestream.read()
+         filestream.close()
+         return contents
+
+    def call_INC(self):
+        if self.TAPE.FP == self.TAPE.CAP:
+            print('ERROR: Frame Pointer reached Tape Capacity')
+        else:
+            self.TAPE.FP += 1
+
+    def call_DEC(self):
+        if self.TAPE.FP == 0:
+            print('ERROR: Frame Pointer at 0, cannot Decrement!')
+        else:
+            self.TAPE.FP -= 1
+   
+    def call_WRITE(self, line):
+        value = ' '.join(line[1:])
+        self.TAPE.FRAMES[self.TAPE.FP] = value
+
+   # def call_READ(self):
+
+   # def call_DELETE(self):
+
+   # def call_MERGE(self):
+
+   # def call_CUT(self):
+
+   # def call_PASTE(self):
+
 
     def add(self, left, right):
         return left + right
@@ -356,6 +359,6 @@ class Core():
 # A machine and tape runtime start up when this file is loaded or imported.
 
 # Initialize and run the machine.
-M = Machine(200)
+M = Machine(64)
 M.run()
 
