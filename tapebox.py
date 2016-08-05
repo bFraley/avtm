@@ -240,10 +240,9 @@ class Machine:
                 # Add unnamed segment to LOOKUP, start segment at Frame Pointer.
                 else:
                     self.LOOKUP.append({ "(S)":(self.TAPE.NS, self.TAPE.FP) })
+                    print(self.LOOKUP[-1])
 
-                print(self.LOOKUP[-1])     
 
-                
             # NAME instruction ( .n )
             # Name a frame location
 
