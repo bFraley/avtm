@@ -12,7 +12,7 @@ class Tape:
         self.NS = 0                  # Number of Segments
         self.SP = 0                  # Segment Pointer
         self.FP = 0                  # Frame Pointer
-        self.CAP = 64
+        self.CAP = 0                 # Tape Capacity
         self.FRAMES = []             # Frame Values
         self.NAMES = []              # Frame and Segment Names
         self.SCOPE = []              # Frame Scope (frame view range)
@@ -41,11 +41,11 @@ class Tape:
 
 class Machine:
     def __init__(self, cap):
-        self.CAP = cap
         self.SRC = []               # Source program file
         self.LOOKUP = []            # Initial lookup table instance
-        self.CORE = Core()
-        self.TAPE = self.CORE.TAPE
+        self.CORE = Core()          # Initial machine Core instance
+        self.TAPE = self.CORE.TAPE  # Initial Tape instance
+        self.TAPE.CAP = cap         # Tape capacity upper limit
         self.RUN = True             # Machine run state
 
         # IMPORTANT! Initialize each TAPE.FRAME value at zero.
@@ -105,7 +105,7 @@ class Machine:
 
         # A program source file was provided.
         if len(sys.argv) > 1:
-            self.SRC.append(self.loadfile())
+            self.SRC.append(self.load_tape_file())
             self.program_execute(self.SRC[0][sys.argv[1]])
 
         # No source file provided, run repl interpretter.
