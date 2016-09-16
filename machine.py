@@ -1,64 +1,27 @@
-# tapebox.py - An abstract virtual tape-based machine.
+# tapebox - An abstract virtual tape-based machine.
 # Copyright by Brett Fraley 2016
+# machine.py
 
 import sys
 
-#----------------------------------------------------------------------
-# Class definitions
-
-class Tape:
-    def __init__(self):
-        self.LC = 0                  # Line Counter
-        self.IC = 0                  # Instruction Counter
-        self.NS = 0                  # Number of Segments
-        self.SP = 0                  # Segment Pointer
-        self.FP = 0                  # Frame Pointer
-        self.CAP = 0                 # Tape Capacity
-        self.FRAMES = []             # Frame Values
-        self.NAMES = []              # Frame and Segment Names
-        self.SCOPE = []              # Frame Scope (frame view range)
-
-    def __str__(self):
-   
-        tape_report = '\nNumber of Segments: ' +  str(self.NS) + \
-           '\nSegment Pointer: ' +  str(self.SP) + \
-               '\nFrame Pointer: ' + str(self.FP)
-        
-        tape_report += '\nNames: '
-        for item in self.NAMES:
-            tape_report += ' | ' + str(item)
-
-        tape_report += '\nScope: '
-        for item in self.SCOPE:
-            tape_report += ' | ' + str(item)
-
-        tape_report +=  '\nFrames:'
-        for item in self.FRAMES:
-            tape_report += ' | ' + str(item)
-    
-        tape_report += '\n'          
-        return tape_report
-
+from core import Core
+from tape import Tape
 
 class Machine:
-    def __init__(self, cap):
+    def __init__(self, tapesize):
         self.SRC = []               # Source program file
         self.LOOKUP = []            # Initial lookup table instance
         self.CORE = Core()          # Initial machine Core instance
         self.TAPE = self.CORE.TAPE  # Initial Tape instance
-        self.TAPE.CAP = cap         # Tape capacity upper limit
+        self.TAPE.SIZE = tapesize         # Tape capacity upper limit
         self.RUN = True             # Machine run state
 
-        # IMPORTANT! Initialize each TAPE.FRAME value at zero.
-
-        for frame in range(cap):
+        # Initialize each TAPE.FRAME value at zero.
+        for frame in range(self.TAPE.SIZE):
             self.TAPE.FRAMES.append(0);
 
-#----------------------------------------------------------------------            
-# Utility Functions
 
     # Load a source file from argv
-
     def load_tape_file(self):
         # Only accepts a single file for now.
         file = open(sys.argv[1])
@@ -69,7 +32,6 @@ class Machine:
         return {sys.argv[1]: lines}
 
     # Lex namespace identifiers - alphanumeric, and can't start with a digit.
-
     def lex_namespace(self, word):
         if word.isalnum():
             if word[0].isdigit():
@@ -82,20 +44,17 @@ class Machine:
             return False
 
     # Lookup if an identifer name exists in TAPE.NAMES
-
     def try_lookup(self, word):
         if word in self.TAPE.NAMES:
             return True
 
     # Lookup the value of a known identifier name.
-
     def lookup_by_name(self, name):
         for i in self.LOOKUP:
             if name in i:
                 value = i[name]
                 return value
             
-                
 #----------------------------------------------------------------------
 # Runtime
     
@@ -293,73 +252,3 @@ class Machine:
     def program_execute(self, program):
         for line in program:
             self.program_step(line)
-
-#--------------------------------------------------------------------
-# Core 
-# TODO: PRVATE METHODS
-
-class Core():
-    def __init__(self):
-        self.instructions = ['+','-','.w','.r','.n','.s','.d','.m','.c','.p']
-        self.opchars = ['+','-','*','/']
-        self.TAPE = Tape()
-
-    def call_open_file(self, filename, mode, label_name):
-         filestream = open(filename, mode)
-         contents = filestream.read()
-         filestream.close()
-         return contents
-
-    def call_INC(self):
-        if self.TAPE.FP == self.TAPE.CAP:
-            print('ERROR: Frame Pointer reached Tape Capacity')
-        else:
-            self.TAPE.FP += 1
-
-    def call_DEC(self):
-        if self.TAPE.FP == 0:
-            print('ERROR: Frame Pointer at 0, cannot Decrement!')
-        else:
-            self.TAPE.FP -= 1
-   
-    def call_WRITE(self, line):
-        value = ' '.join(line[1:])
-        self.TAPE.FRAMES[self.TAPE.FP] = value
-
-   # def call_READ(self):
-
-   # def call_DELETE(self):
-
-   # def call_MERGE(self):
-
-   # def call_CUT(self):
-
-   # def call_PASTE(self):
-
-
-    def add(self, left, right):
-        return left + right
-
-    def sub(self, left, right):
-        return left - right
-
-    def mul(self, left, right):
-        return left * right
-
-    def div(self, left, right):
-        return left / right
-
-    def mod(self, left, right):
-        return left % right
-
-    def exp(self, expression):
-        return expression
-
-#----------------------------------------------------------------------
-# For development purposes.
-# A machine and tape runtime start up when this file is loaded or imported.
-
-# Initialize and run the machine.
-M = Machine(64)
-M.run()
-
