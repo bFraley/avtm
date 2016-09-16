@@ -4,8 +4,6 @@
 
 import machine
 
-
-
 # Initialize and run the machine.
 M = machine.Machine(64)
 M.run()

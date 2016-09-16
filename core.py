@@ -2,6 +2,7 @@
 # Copyright by Brett Fraley 2016
 # core.py
 
+from lib import lex_namespace, lookup_by_name, try_lookup
 from tape import Tape
 
 class Core():
@@ -32,8 +33,42 @@ class Core():
         value = ' '.join(line[1:])
         self.TAPE.FRAMES[self.TAPE.FP] = value
 
-   # def call_READ(self):
+    def call_READ(self, line):
+        i = 1
+        line_length = len(line)
 
+        if line_length > 1:
+            read_argument = line[i+1]
+
+            # Read a frame's value via frame index number.
+            if read_argument.isdigit():
+                read_argument = int(read_argument)
+            
+                if read_argument >= len(self.TAPE.FRAMES):
+                    print('ERROR: Read above frame index range')
+                    exit(0)
+
+                elif read_argument < 0:
+                    print('ERROR: Read below frame index range')
+                    exit(0)
+
+                else:
+                    value = self.TAPE.FRAMES[read_argument]
+                    print(value)
+                    return value
+
+            # Read a frame's value via namespace identifier.
+            elif lex_namespace(read_argument):
+                 
+                if try_lookup(read_argument, self.TAPE.NAMES):
+                    frameindex = self.lookup_by_name(read_argument)
+                    value = self.TAPE.FRAMES[frameindex]
+                    print(value)
+                    return value
+                else:
+                    print('Cannot read name from tape, unrecognized name')
+
+        
    # def call_DELETE(self):
 
    # def call_MERGE(self):

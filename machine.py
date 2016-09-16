@@ -19,40 +19,6 @@ class Machine:
         for frame in range(self.TAPE.SIZE):
             self.TAPE.FRAMES.append(0);
 
-
-    # Load a source file from argv
-    def load_tape_file(self):
-        # Only accepts a single file for now.
-        file = open(sys.argv[1])
-        src = file.read()
-        lines = src.split('\n')
-        file.close()
-
-        return {sys.argv[1]: lines}
-
-    # Lex namespace identifiers - alphanumeric, and can't start with a digit.
-    def lex_namespace(self, word):
-        if word.isalnum():
-            if word[0].isdigit():
-                print('NAME ERROR: name begins with digit')
-                exit(0)
-            else:
-                return True
-        else:
-            print('NAME ERROR: unknown input after .n instruction')
-            return False
-
-    # Lookup if an identifer name exists in TAPE.NAMES
-    def try_lookup(self, word):
-        if word in self.TAPE.NAMES:
-            return True
-
-    # Lookup the value of a known identifier name.
-    def lookup_by_name(self, name):
-        for i in self.LOOKUP:
-            if name in i:
-                value = i[name]
-                return value
             
 #----------------------------------------------------------------------
 # Runtime
@@ -126,42 +92,14 @@ class Machine:
 
             elif line[i] == self.CORE.instructions[3]:
                 if line_length > 1:
-                
-                    read_argument = line[i+1]
-
-                    # Read a frame's value via frame index number.
-                    if read_argument.isdigit():
-                        read_argument = int(read_argument)
-                    
-                        if read_argument >= len(self.TAPE.FRAMES):
-                            print('ERROR: Read above frame index range')
-                            exit(0)
-
-                        elif read_argument < 0:
-                            print('ERROR: Read below frame index range')
-                            exit(0)
-
-                        else:
-                            value = self.TAPE.FRAMES[read_argument]
-                            print(value)
-                            return value
-
-                    # Read a frame's value via namespace identifier.
-                    elif self.lex_namespace(read_argument):
-                         
-                        if self.try_lookup(read_argument):
-                            frameindex = self.lookup_by_name(read_argument)
-                            value = self.TAPE.FRAMES[frameindex]
-                            print(value)
-                            return value
-                        else:
-                            print('Cannot read name from tape, unrecognized name')
+                    arg = line[i+1]
+                    self.CORE.call_READ(arg)
 
                 # No specific read argument was provided, so read the current frame.
                 else:
                     value = self.TAPE.FRAMES[self.TAPE.FP]
                     print(value)
-            
+
             # SEGMENT instruction ( .s )
             # Create a new named segment, or un-named segment.
             # Usage: .s .n [mysegment], or just the ( .s ) command.
