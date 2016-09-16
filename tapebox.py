@@ -8,6 +8,7 @@ import sys
 
 class Tape:
     def __init__(self):
+        self.LC = 0                  # Line Counter
         self.IC = 0                  # Instruction Counter
         self.NS = 0                  # Number of Segments
         self.SP = 0                  # Segment Pointer
