@@ -5,7 +5,6 @@
 import sys
 
 from core import Core
-from tape import Tape
 
 class Machine:
     def __init__(self, tapesize):
@@ -13,7 +12,7 @@ class Machine:
         self.LOOKUP = []            # Initial lookup table instance
         self.CORE = Core()          # Initial machine Core instance
         self.TAPE = self.CORE.TAPE  # Initial Tape instance
-        self.TAPE.SIZE = tapesize         # Tape capacity upper limit
+        self.TAPE.SIZE = tapesize   # Tape size is number of frames on tape.
         self.RUN = True             # Machine run state
 
         # Initialize each TAPE.FRAME value at zero.
@@ -160,7 +159,7 @@ class Machine:
 
                 # No specific read argument was provided, so read the current frame.
                 else:
-                    value = self.TAPE.FRAMES[self.TAPE.FP])
+                    value = self.TAPE.FRAMES[self.TAPE.FP]
                     print(value)
             
             # SEGMENT instruction ( .s )

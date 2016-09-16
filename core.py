@@ -2,6 +2,8 @@
 # Copyright by Brett Fraley 2016
 # core.py
 
+from tape import Tape
+
 class Core():
     def __init__(self):
         self.instructions = ['+','-','.w','.r','.n','.s','.d','.m','.c','.p']
@@ -15,7 +17,7 @@ class Core():
          return contents
 
     def call_INC(self):
-        if self.TAPE.FP == self.TAPE.CAP:
+        if self.TAPE.FP == self.TAPE.SIZE:
             print('ERROR: Frame Pointer reached Tape Capacity')
         else:
             self.TAPE.FP += 1

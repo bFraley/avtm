@@ -9,7 +9,7 @@ class Tape:
         self.NS = 0                  # Number of Segments
         self.SP = 0                  # Segment Pointer
         self.FP = 0                  # Frame Pointer
-        self.CAP = 0                 # Tape Capacity
+        self.SIZE = 0                # Tape Capacity
         self.FRAMES = []             # Frame Values
         self.NAMES = []              # Frame and Segment Names
         self.SCOPE = []              # Frame Scope (frame view range)
@@ -34,4 +34,3 @@ class Tape:
     
         tape_report += '\n'          
         return tape_report
-
