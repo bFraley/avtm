@@ -1,4 +1,2 @@
-# gitignore for avtm/tapebox project
-
 __pycache__/
-
+.DS_Stor
