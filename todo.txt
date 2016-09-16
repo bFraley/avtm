@@ -36,4 +36,6 @@ NOTES: 2016
     8-1) Got basic namespace identifier instruction working for naming
          single frames and or segments - along with ability to lookup
          and  ( .r ) read a frame or segment by name.
+
+    9-15) Revisit project and plan next steps.
     

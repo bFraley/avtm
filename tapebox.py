@@ -201,7 +201,8 @@ class Machine:
 
                 # No specific read argument was provided, so read the current frame.
                 else:
-                    print(self.TAPE.FRAMES[self.TAPE.FP])
+                    value = self.TAPE.FRAMES[self.TAPE.FP])
+                    print(value)
             
             # SEGMENT instruction ( .s )
             # Create a new named segment, or un-named segment.
