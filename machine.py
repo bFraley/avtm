@@ -4,6 +4,7 @@
 
 import sys
 
+from lib import lex_namespace, lookup_by_name, try_lookup
 from core import Core
 
 class Machine:
@@ -150,12 +151,12 @@ class Machine:
 
                     # Is this namespace already defined?
                 
-                    if self.try_lookup(tryname):
+                    if try_lookup(tryname, self.TAPE.NAMES):
                         print('ERROR: Cannot assign this name. Already in use')
                 
                     # Is the input a valid name?
     
-                    if self.lex_namespace(tryname):
+                    if lex_namespace(tryname):
                         self.TAPE.NAMES.append(tryname)
                         self.LOOKUP.append({tryname:self.TAPE.FP})
 
