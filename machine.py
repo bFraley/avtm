@@ -14,6 +14,7 @@ class Machine:
         self.CORE = Core()          # Initial machine Core instance
         self.TAPE = self.CORE.TAPE  # Initial Tape instance
         self.TAPE.SIZE = tapesize   # Tape size is number of frames on tape.
+        self.TAPE.lookup = self.LOOKUP
         self.RUN = True             # Machine run state
 
         # Initialize each TAPE.FRAME value at zero.

@@ -16,7 +16,7 @@ def try_lookup(word, names):
         return True
 
 # Lookup the value of a known identifier name.
-def lookup_by_name(name):
+def lookup_by_name(name, lookup):
     for i in lookup:
         if name in i:
             value = i[name]
